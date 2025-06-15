@@ -15,8 +15,7 @@ Le immagini sono poi distribuite in uno spazio tridimensionale secondo due modal
 - **CUBO RGB** – basato su coordinate cartesiane e logica additiva del colore  
 - **CILINDRO HSB** – basato su logica percettiva: tonalità, saturazione e luminosità
 
-Con un sistema AI (YOLO), le immagini sono state scomposte in **2777 entità visive**, corrispondenti a oggetti rilevati come *persona*, *gatto*, *automobile*, *cane* ecc.  
-Il sito permette di esplorare questo spazio filtrando e navigando in modo visivo il mio archivio personale.
+Con un sistema AI (YOLO), le immagini sono state scomposte in **2777 entità visive**, corrispondenti a oggetti rilevati come *persona*, *gatto*, *automobile*, *cane* ecc. Il sito permette di esplorare questo spazio filtrando e navigando in modo visivo il mio archivio personale.
 
 ## Riferimenti progettuali  
 Il progetto si ispira a:
