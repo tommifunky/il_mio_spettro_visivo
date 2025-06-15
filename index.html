@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RGB/HSB Atlas Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+
+    #toggleMode {
+  display: none !important; /* Add this to your existing CSS */
+}
+
+    * {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+    }
+    
+    #landing-page {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0);
+      z-index: 1000;
+      display: block;
+      transition: opacity 0s;
+    }
+    
+    #landing-page.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+.visualization-buttons {
+  display: flex;
+  justify-content: center;
+  position: fixed;
+  bottom: 15%;
+  left: 0;
+  width: 100%;
+  height: 70vh;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0s;
+}
+
+.visualization-buttons.visible {
+  opacity: 1;
+}
+
+
+
+.viz-button {
+  cursor: pointer;
+  transition: transform 0.3s;
+  width: 45vw;  /* Changed from fixed width to viewport width */
+  max-width: 650px; /* Maximum width */
+  height: auto;
+  aspect-ratio: 1/1; /* Maintain square aspect ratio */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#cubePreview canvas,
+#cylinderPreview canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.content {
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  padding: 0px;
+  margin: 0px;
+  position: absolute;
+}
+
+.terminal-text {
+  padding-top: 2px;
+  padding-left: 5px;
+  white-space: pre-line;
+  opacity: 0;
+}
+
+.terminal-text span {
+  opacity: 1;
+  display: inline-block;
+}
+
+.terminal-text::after {
+  content: '█';
+  animation: blink 1s step-end infinite;
+  font-weight: 500;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.terminal-input {
+  background: transparent;
+  border: none;
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  width: 1px;
+  position: absolute;
+  opacity: 0;
+}
+
+.gray-text {
+  color: #666666 !important;
+  opacity: 1 !important; 
+}
+
+.loading-bar {
+  color: white;
+}
+
+.explanation-text {
+  animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+    
+
+
+
+
+.explanation-container {
+  position: fixed;
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: pre;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding-top: 52px;
+  padding-left: 5px;
+}
+
+.explanation-container.visible {
+  opacity: 1;
+}
+
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+
+.cursor {
+  animation: blink 1s step-end infinite; 
+}
+
+.typing-done .cursor {
+  display: none;
+}
+
+
+.filters-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: pre;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  margin: 0;
+  padding-top: 4px;
+  padding-left: 0px;
+  padding-right: 5px;
+  padding-bottom: 50px; /* Aggiungi questa linea */
+  max-width: 300px;
+  width: 150px;
+    max-height: 100vh; /* Aggiungi questa linea */
+  height: auto ;     /* Aggiungi questa linea */
+  overflow-y: auto;
+  text-align: right;
+}
+
+
+.filters-container.visible {
+  opacity: 1;
+}
+
+.filters-container span {
+  transition: color 0s ;
+  cursor: pointer;
+  color: #666666;
+}
+
+.filters-container span:hover {
+  color: white !important;
+}
+
+.filters-container span.active-filter {
+  color: white !important;
+}
+
+
+.homepage-button {
+  position: fixed;
+  top: 0;
+  left: 0;
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: pre;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  margin: 0;
+  padding: 4px 4px;
+  cursor: pointer;
+}
+
+.homepage-button.visible {
+  opacity: 1;
+}
+
+.homepage-button:hover {
+  color: #666666;
+}
+
+.view-switch-button {
+  position: fixed;
+  top: 17px;
+  left: 0px;  /* Position it after the homepage button */
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: pre;
+  z-index: 9999;
+  opacity: 0;
+  margin: 0;
+  padding: 4px 4px;
+  cursor: pointer;
+}
+
+.view-switch-button.visible {
+  opacity: 1;
+} 
+
+.view-switch-button:hover {
+  color: #666666;
+}
+  </style>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const filtersContainer = document.querySelector('.filters-container');
+  filtersContainer.addEventListener('wheel', (e) => {
+    e.stopPropagation();
+  });
+});
+</script>
+</head>
+<body>
+  <div id="loading">Loading...</div>
+  <div id="toggleMode">Switch View</div>
+  <div id="landing-page" class="active">
+    <div id="landing-page" class="active">
+  <div class="content">
+    <div class="terminal-text">orario di lancio: 21:38:12 mercoledi 4 giugno
+utente@dispositivo ~ % ./il_mio_spettro_visivo
+
+<span class="gray-text"># inizializzazione archivio ...
+# immagini analizzate: 1001 da dispositivi iPhone
+# periodo di osservazione: 2011 → 2024
+# dispositivi utilizzati: iPhone 6, SE, X, 13 Pro, 15
+# oggetti rilevati: 2777 entità totali
+# categorie più frequenti: person, car, dog, cat
+# densità media: 2.8 oggetti per immagine
+# calcolo colori medi in corso...
+# costruzione dello spazio cromatico completata
+</span>
+
+modalità disponibili:
+  • rgb — spazio cartesiano, logica additiva
+  • hsb — spazio circolare, logica percettiva
+
+digita `cubo` per entrare nella visualizzazione rgb
+digita `cilindro` per esplorare la visualizzazione hsb
+digita `help` per assistenza
+
+utente@dispositivo ~ % </div>
+    
+    <div class="visualization-buttons">
+      <div class="viz-button" id="rgbButton">
+        <div id="cubePreview"></div>
+      </div>
+      
+      <div class="viz-button" id="hsbButton">
+        <div id="cylinderPreview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('it-IT');
+      const dayNames = ['domenica', 'lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'];
+      const dayName = dayNames[now.getDay()];
+      const day = now.getDate();
+      const monthNames = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+      const monthName = monthNames[now.getMonth()];
+      
+      const deviceName = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'iphone' : 
+                        /Android/i.test(navigator.userAgent) ? 'android' :
+                        /Mac/i.test(navigator.userAgent) ? 'macbook' :
+                        /Windows/i.test(navigator.userAgent) ? 'windows' : 'dispositivo';
+      
+      const terminalText = document.querySelector('.terminal-text');
+      const text = terminalText.innerHTML;
+      
+      terminalText.innerHTML = text
+        .replace('21:38:12 mercoledi 4 giugno', `${timeString} ${dayName} ${day} ${monthName}`)
+        .replace('utente@dispositivo', `utente@${deviceName}`);
+    });
+    
+    let atlas, atlasData, colorData;
+    let immagini = [];
+    let visibleImages = [];
+    let colorMap = {};
+    let modalita = 'rgb';
+    let deviceName = 'dispositivo';
+    let filtroAttivo = null;
+
+
+    const ATLAS_PATH = 'dataset/atlas.jpg';
+    const ATLAS_JSON = 'dataset/atlas.json';
+    const COLORS_JSON = 'dataset/data_colors_1.json';
+
+    
+
+    function preload() {
+    atlas = loadImage(ATLAS_PATH);
+    atlasData = loadJSON(ATLAS_JSON);
+    colorData = loadJSON(COLORS_JSON);
+    yoloData = loadJSON('dataset/data_yolo_semplificato.json');
+}
+
+  // Add this function near the beginning of your script
+function getUniqueClasses() {
+  let classCount = {};
+  Object.values(atlasData).forEach(item => {
+    if (item.class) {
+      classCount[item.class] = (classCount[item.class] || 0) + 1;
+    }
+  });
+  
+  // Ordina le classi per conteggio decrescente
+  const sortedClasses = Object.entries(classCount)
+    .sort((a, b) => b[1] - a[1]) // Ordina per conteggio decrescente
+    .map(([className, count]) => `<span style="cursor: pointer">${className} [${count}]</span>`)
+    .join('\n');
+  
+  return sortedClasses + '\n';
+}
+
+
+
+
+
+
+
+
+    function setup() {
+    createCanvas(windowWidth, windowHeight, WEBGL);
+    textureMode(NORMAL);
+    noStroke();
+
+    camera(0, 0, 900);
+    
+    // Carica le immagini
+    const colorArray = Array.isArray(colorData) ? colorData : Object.values(colorData);
+    colorArray.forEach(d => {
+        if (d.Colors && d.Colors[0]) {
+            colorMap[d.FileName.toLowerCase()] = d.Colors[0];
+        }
+    });
+
+    Object.keys(atlasData).forEach(key => {
+        const item = atlasData[key];
+        const filename = item.FileName.toLowerCase();
+        const colorHex = colorMap[filename];
+        if (!colorHex) return;
+
+        const u1 = item.x / atlas.width;
+        const v1 = item.y / atlas.height;
+        const u2 = (item.x + item.width) / atlas.width;
+        const v2 = (item.y + item.height) / atlas.height;
+
+        immagini.push(new Immagine(item.FileName, item.width / 8, item.height / 8, u1, v1, u2, v2, 0, 0, 0));
+    });
+
+    // Add this line to initialize visibleImages
+    visibleImages = immagini;
+
+    // Aggiorna le posizioni iniziali
+    aggiornaPosizioniImmagini();
+    document.getElementById('loading').style.display = 'none';
+}
+
+    function aggiornaPosizioniImmagini() {
+    const cubeSize = 450;
+    const radiusMax = cubeSize / 2 + 45;
+    colorMode(RGB);
+
+    // Array per tenere traccia delle posizioni occupate
+    let occupiedPositions = [];
+    const minDistance = 10; // Distanza minima tra le immagini
+
+    visibleImages.forEach(img => {
+        const col = color(colorMap[img.nome.toLowerCase()]);
+        const r = red(col);
+        const g = green(col);
+        const b = blue(col);
+
+        let position;
+        if (modalita === 'rgb') {
+            let x = map(r, 0, 255, -cubeSize/2, cubeSize/2);
+            let y = map(b, 0, 255, cubeSize/2, -cubeSize/2);
+            let z = map(g, 0, 255, -cubeSize/2, cubeSize/2);
+
+            // Aggiungi piccoli offset finché non troviamo una posizione libera
+            while (isPositionOccupied(x, y, z, occupiedPositions, minDistance)) {
+                x += random(-minDistance, minDistance);
+                y += random(-minDistance, minDistance);
+                z += random(-minDistance, minDistance);
+            }
+            position = createVector(x, y, z);
+        } else {
+            colorMode(HSB, 360, 100, 100);
+            const hsb = color(col);
+            const h = hue(hsb);
+            const s = saturation(hsb);
+            const br = brightness(hsb);
+
+            let angle = radians(h);
+            let radius = map(s, 0, 100, 0, radiusMax);
+            let y = map(br, 0, 100, cubeSize/2, -cubeSize/2);
+
+            // Aggiungi piccole variazioni all'angolo e al raggio
+            while (true) {
+                let x = cos(angle) * radius;
+                let z = sin(angle) * radius;
+                
+                if (!isPositionOccupied(x, y, z, occupiedPositions, minDistance)) {
+                    position = createVector(x, y, z);
+                    break;
+                }
+                
+                angle += random(-0.1, 0.1);
+                radius += random(-minDistance/2, minDistance/2);
+                y += random(-minDistance/2, minDistance/2);
+            }
+            colorMode(RGB);
+        }
+
+        occupiedPositions.push(position);
+        img.pos.set(position.x, position.y, position.z);
+    });
+}
+
+// Funzione helper per verificare se una posizione è troppo vicina ad altre
+function isPositionOccupied(x, y, z, positions, minDistance) {
+    return positions.some(pos => {
+        const d = dist(x, y, z, pos.x, pos.y, pos.z);
+        return d < minDistance;
+    });
+}
+
+   
+
+
+    function draw() {
+      background(0);
+      orbitControl();
+      ambientLight(255);
+
+      if (modalita === 'rgb') {
+        push();
+        stroke(255);
+        strokeWeight(0.1);
+        noFill();
+        const s = 500;
+        const h = s / 2;
+        
+        beginShape(LINES);
+        vertex(-h, -h, -h); vertex(h, -h, -h);
+        vertex(h, -h, -h); vertex(h, h, -h);
+        vertex(h, h, -h); vertex(-h, h, -h);
+        vertex(-h, h, -h); vertex(-h, -h, -h);
+        vertex(-h, -h, -h); vertex(-h, -h, h);
+        vertex(h, -h, -h); vertex(h, -h, h);
+        vertex(h, h, -h); vertex(h, h, h);
+        vertex(-h, h, -h); vertex(-h, h, h);
+        vertex(-h, -h, h); vertex(h, -h, h);
+        vertex(h, -h, h); vertex(h, h, h);
+        vertex(h, h, h); vertex(-h, h, h);
+        vertex(-h, h, h); vertex(-h, -h, h);
+        endShape();
+
+        stroke(255, 60);
+        strokeWeight(0.5);
+        const divisions = 8;
+        const step = s / divisions;
+
+        for (let i = -h; i <= h; i += step) {
+          line(-h, i, -h, h, i, -h);
+          line(i, -h, -h, i, h, -h);
+          line(-h, i, h, h, i, h);
+          line(i, -h, h, i, h, h);
+          line(-h, -h, i, -h, h, i);
+          line(-h, i, -h, -h, i, h);
+          line(h, -h, i, h, h, i);
+          line(h, i, -h, h, i, h);
+          line(-h, -h, i, h, -h, i);
+          line(i, -h, -h, i, -h, h);
+          line(-h, h, i, h, h, i);
+          line(i, h, -h, i, h, h);
+        }
+        pop();
+      } else {
+        push();
+        const s = 500;
+        const h = s / 2;
+        
+        const verticalDivisions = 8;
+        const stepY = (2 * h) / verticalDivisions;
+        const arcLength = stepY;
+        const stepAngle = arcLength / h;
+        const horizontalDivisions = Math.floor(TWO_PI / stepAngle);
+        const detail = horizontalDivisions;
+
+        stroke(255);
+        strokeWeight(0.2);
+        noFill();
+
+        for (let y = -h; y <= h; y += h * 2) {
+          beginShape();
+          for (let i = 0; i <= detail; i++) {
+            const angle = stepAngle * i;
+            const x = cos(angle) * h;
+            const z = sin(angle) * h;
+            vertex(x, y, z);
+          }
+          endShape(CLOSE);
+        }
+
+        for (let i = 0; i < detail; i++) {
+          const angle = stepAngle * i;
+          const x = cos(angle) * h;
+          const z = sin(angle) * h;
+          line(x, -h, z, x, h, z);
+        }
+
+        stroke(255, 60);
+        strokeWeight(0.5);
+
+        for (let y = -h + stepY; y < h; y += stepY) {
+          beginShape();
+          for (let i = 0; i <= detail; i++) {
+            const angle = stepAngle * i;
+            const x = cos(angle) * h;
+            const z = sin(angle) * h;
+            vertex(x, y, z);
+          }
+          endShape(CLOSE);
+        }
+
+        for (let angle = 0; angle < TWO_PI; angle += stepAngle) {
+          const x1 = cos(angle) * h;
+          const z1 = sin(angle) * h;
+          line(x1, -h, z1, x1, h, z1);
+        }
+
+        pop();
+      }
+
+      noStroke();
+    beginShape(QUADS);
+    texture(atlas);
+    visibleImages.forEach(img => img.emettiVertici());
+    endShape();
+    }
+
+    class Immagine {
+      constructor(nome, w, h, u1, v1, u2, v2, x, y, z) {
+        this.nome = nome;
+        this.w = w;
+        this.h = h;
+        this.u1 = u1;
+        this.v1 = v1;
+        this.u2 = u2;
+        this.v2 = v2;
+        this.pos = createVector(x, y, z);
+      }
+
+      emettiVertici() {
+        const x = this.pos.x;
+        const y = this.pos.y;
+        const z = this.pos.z;
+        const w2 = this.w / 2;
+        const h2 = this.h / 2;
+        vertex(x - w2, y - h2, z, this.u1, this.v1);
+        vertex(x + w2, y - h2, z, this.u2, this.v1);
+        vertex(x + w2, y + h2, z, this.u2, this.v2);
+        vertex(x - w2, y + h2, z, this.u1, this.v2);
+      }
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+
+    document.getElementById('toggleMode').addEventListener('click', () => {
+      modalita = modalita === 'rgb' ? 'hsb' : 'rgb';
+      aggiornaPosizioniImmagini();
+    });
+
+    // Modifica i listener dei pulsanti RGB e HSB
+document.getElementById('rgbButton').addEventListener('click', () => {
+  const terminalText = document.querySelector('.terminal-text');
+  const currentText = terminalText.innerHTML;
+  
+  // Aggiungi il comando "cubo" come se fosse stato digitato
+  terminalText.innerHTML = currentText + 'cubo\ncreazione spazio colore\n';
+  
+  let progress = 0;
+  const loadingInterval = setInterval(() => {
+    progress += 2;
+    const barLength = 30;
+    const filled = Math.floor((progress * barLength) / 100);
+    const empty = barLength - filled;
+    const progressBar = '<span class="loading-bar">[' + '█'.repeat(filled) + ' '.repeat(empty) + ']</span>';
+    
+    terminalText.innerHTML = currentText + 'cubo\ncreazione spazio colore\n' + progressBar + ` ${progress}%`;
+    
+    if (progress >= 100) {
+      clearInterval(loadingInterval);
+      terminalText.innerHTML = currentText + 'cubo\ncreazione spazio colore\n' + 
+        '<span class="loading-bar">[████████████████████████████████] 100%</span>\n' +
+        'Transizione completata.\nPassaggio alla visualizzazione CUBO\n';
+      
+      setTimeout(() => {
+        modalita = 'rgb';
+        animateAndTransition();
+        document.getElementById('landing-page').classList.add('hidden');
+        document.getElementById('toggleMode').style.display = 'block';
+        aggiornaPosizioniImmagini();
+      }, 500);
+    }
+  }, 30);
+});
+
+document.getElementById('hsbButton').addEventListener('click', () => {
+  const terminalText = document.querySelector('.terminal-text');
+  const currentText = terminalText.innerHTML;
+  
+  // Aggiungi il comando "cilindro" come se fosse stato digitato
+  terminalText.innerHTML = currentText + 'cilindro\ncreazione spazio colore\n';
+  
+  let progress = 0;
+  const loadingInterval = setInterval(() => {
+    progress += 2;
+    const barLength = 30;
+    const filled = Math.floor((progress * barLength) / 100);
+    const empty = barLength - filled;
+    const progressBar = '<span class="loading-bar">[' + '█'.repeat(filled) + ' '.repeat(empty) + ']</span>';
+    
+    terminalText.innerHTML = currentText + 'cilindro\ncreazione spazio colore\n' + progressBar + ` ${progress}%`;
+    
+    if (progress >= 100) {
+      clearInterval(loadingInterval);
+      terminalText.innerHTML = currentText + 'cilindro\ncreazione spazio colore\n' + 
+        '<span class="loading-bar">[████████████████████████████████] 100%</span>\n' +
+        'Transizione completata.\nPassaggio alla visualizzazione CILINDRO\n';
+      
+      setTimeout(() => {
+        modalita = 'hsb';
+        animateAndTransition();
+        document.getElementById('landing-page').classList.add('hidden');
+        document.getElementById('toggleMode').style.display = 'block';
+        aggiornaPosizioniImmagini();
+      }, 500);
+    }
+  }, 30);
+});
+
+
+function animateAndTransition() {
+  // Reset landing page and toggle mode display
+  document.getElementById('landing-page').classList.add('hidden');
+  document.getElementById('toggleMode').style.display = 'block';
+  
+  // Get all container elements
+  const explanationContainer = document.getElementById('explanation-container');
+  const filtersContainer = document.getElementById('filters-container');
+  const homepageButton = document.getElementById('homepage-button');
+  const viewSwitchButton = document.getElementById('view-switch-button');
+  
+  // Clear all containers
+  explanationContainer.innerHTML = '';
+  filtersContainer.innerHTML = '';
+  homepageButton.innerHTML = '';
+  viewSwitchButton.innerHTML = '';
+  
+  // Remove visible classes
+  explanationContainer.classList.remove('visible');
+  filtersContainer.classList.remove('visible');
+  homepageButton.classList.remove('visible');
+  viewSwitchButton.classList.remove('visible');
+
+  // Reset animation variables
+  let i = 0;
+  let j = 0;
+  let h = 0;
+  let v = 0;
+  let isSkipping = false;
+
+  // Get device name
+  const deviceName = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'iphone' : 
+                    /Android/i.test(navigator.userAgent) ? 'android' :
+                    /Mac/i.test(navigator.userAgent) ? 'macbook' :
+                    /Windows/i.test(navigator.userAgent) ? 'windows' : 'dispositivo';
+  
+  // Get unique classes for filters
+  const uniqueClasses = getUniqueClasses();
+
+  // Define explanation text based on modalita
+  let explanation = modalita === 'rgb' ? 
+    `Archivio visivo composto da 2777 entità,
+disposte nello spazio colore RGB.
+
+• Asse X       = rosso (R)
+• Asse Y       = verde (G)
+• Asse Z       = blu (B)
+
+Ogni entità è posizionata in base
+al suo colore medio (RGB).
+` :
+    `Archivio visivo composto da 2777 entità,
+disposte nello spazio colore HSB.
+
+• Angolo       = tonalità (H)
+• Raggio       = saturazione (S)
+• Altezza      = luminosità (B)
+
+Ogni entità è posizionata in base
+al suo colore medio (HSB).`;
+
+  // Define filters text
+  let filters = `[entità trovate]\n\n<span style="color: #666666">${uniqueClasses}</span>`;
+
+  // Define button texts
+  const homepageText = '[homepage]';
+  const viewSwitchText = '[cambia visualizzazione]';
+  
+  // Split texts into characters for animation
+  const homepageChars = homepageText.split('');
+  const viewSwitchChars = viewSwitchText.split('');
+  const explanationChars = explanation.split('');
+  const filtersChars = filters.split('');
+
+  // Homepage button click handler
+  homepageButton.addEventListener('click', () => {
+    location.reload();
+  });
+
+  // Aggiungi questa modifica nel click handler del view-switch-button
+viewSwitchButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    
+    // Reset filtro attivo
+    filtroAttivo = null;
+    visibleImages = [...immagini];
+    
+    // Remove all existing event listeners
+    const oldExplanationContainer = explanationContainer.cloneNode(false);
+    const oldFiltersContainer = filtersContainer.cloneNode(false);
+    const oldHomepageButton = homepageButton.cloneNode(false);
+    const oldViewSwitchButton = viewSwitchButton.cloneNode(false);
+    
+    explanationContainer.parentNode.replaceChild(oldExplanationContainer, explanationContainer);
+    filtersContainer.parentNode.replaceChild(oldFiltersContainer, filtersContainer);
+    homepageButton.parentNode.replaceChild(oldHomepageButton, homepageButton);
+    viewSwitchButton.parentNode.replaceChild(oldViewSwitchButton, viewSwitchButton);
+    
+    // Reset containers
+    oldExplanationContainer.innerHTML = '';
+    oldFiltersContainer.innerHTML = '';
+    oldHomepageButton.innerHTML = '';
+    oldViewSwitchButton.innerHTML = '';
+    
+    // Remove visible classes
+    oldExplanationContainer.classList.remove('visible');
+    oldFiltersContainer.classList.remove('visible');
+    oldHomepageButton.classList.remove('visible');
+    oldViewSwitchButton.classList.remove('visible');
+    
+    // Reset animation variables
+    i = 0;
+    j = 0;
+    h = 0;
+    v = 0;
+    isSkipping = false;
+    
+    // Switch mode
+    modalita = modalita === 'rgb' ? 'hsb' : 'rgb';
+    
+    // Start new animation after a short delay
+    setTimeout(() => {
+        animateAndTransition();
+        aggiornaPosizioniImmagini();
+    }, 100);
+});
+  
+
+  // Skip animation handler
+  const skipAnimation = (e) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.type === 'click') {
+      e.preventDefault();
+      isSkipping = true;
+      
+      homepageButton.innerHTML = homepageText;
+      homepageButton.classList.add('visible');
+      viewSwitchButton.innerHTML = viewSwitchText;
+      viewSwitchButton.classList.add('visible');
+      explanationContainer.innerHTML = explanation;
+      filtersContainer.innerHTML = filters;
+      
+      explanationContainer.classList.add('visible');
+      filtersContainer.classList.add('visible');
+    }
+  };
+
+  // Add skip event listeners
+  document.addEventListener('keydown', skipAnimation);
+  document.addEventListener('click', skipAnimation);
+
+  // Homepage button typing animation
+  function typeHomepage() {
+    if (isSkipping) return;
+    
+    if (h < homepageChars.length) {
+      homepageButton.style.opacity = '1';
+      homepageButton.innerHTML = homepageButton.innerHTML.replace('█', '');
+      
+      if (homepageChars[h] === ' ') {
+        homepageButton.innerHTML += '&nbsp;';
+      } else {
+        homepageButton.innerHTML += homepageChars[h];
+      }
+      
+      if (h < homepageChars.length - 1) {
+        homepageButton.innerHTML += '█';
+      }
+      h++;
+      setTimeout(typeHomepage, 50);
+    } else {
+      homepageButton.innerHTML = homepageButton.innerHTML.replace('█', '');
+      homepageButton.classList.add('visible');
+    }
+  }
+
+  // View switch button typing animation
+  function typeViewSwitch() {
+    if (isSkipping) return;
+    
+    if (v < viewSwitchChars.length) {
+      viewSwitchButton.style.opacity = '1';
+      viewSwitchButton.innerHTML = viewSwitchButton.innerHTML.replace('█', '');
+      
+      if (viewSwitchChars[v] === ' ') {
+        viewSwitchButton.innerHTML += '&nbsp;';
+      } else {
+        viewSwitchButton.innerHTML += viewSwitchChars[v];
+      }
+      
+      if (v < viewSwitchChars.length - 1) {
+        viewSwitchButton.innerHTML += '█';
+      }
+      v++;
+      setTimeout(typeViewSwitch, 50);
+    } else {
+      viewSwitchButton.innerHTML = viewSwitchButton.innerHTML.replace('█', '');
+      viewSwitchButton.classList.add('visible');
+    }
+  }
+
+  // Explanation text typing animation
+  function typeExplanation() {
+    if (isSkipping) return;
+    if (i < explanationChars.length) {
+      explanationContainer.innerHTML = explanationContainer.innerHTML.replace('█', '');
+      
+      if (explanationChars[i] === '\n') {
+        explanationContainer.innerHTML += '<br>';
+      } else {
+        explanationContainer.innerHTML += explanationChars[i];
+      }
+      if (i < explanationChars.length - 1) {
+        explanationContainer.innerHTML += '█';
+      }
+      i++;
+      setTimeout(typeExplanation, 10);
+    } else {
+      explanationContainer.innerHTML = explanationContainer.innerHTML.replace('█', '');
+      explanationContainer.classList.add('visible');
+    }
+  }
+
+  // Filters text typing animation
+  function typeFilters() {
+    if (isSkipping) return;
+    if (j < filtersChars.length) {
+      filtersContainer.innerHTML = filtersContainer.innerHTML.replace('█', '');
+      
+      if (filtersChars[j] === '<') {
+        let tagContent = '<';
+        let k = j + 1;
+        while (k < filtersChars.length && filtersChars[k] !== '>') {
+          tagContent += filtersChars[k];
+          k++;
+        }
+        tagContent += '>';
+        
+        if (tagContent.includes('span')) {
+          filtersContainer.innerHTML += tagContent;
+        } else {
+          filtersContainer.innerHTML += filtersChars[j];
+        }
+        j = k + 1;
+      } else if (filtersChars[j] === '\n') {
+        filtersContainer.innerHTML += '<br>';
+        j++;
+      } else {
+        const lastSpan = filtersContainer.querySelector('span:last-child');
+        if (lastSpan) {
+          lastSpan.textContent += filtersChars[j];
+        } else {
+          filtersContainer.innerHTML += filtersChars[j];
+        }
+        j++;
+      }
+      
+      if (j < filtersChars.length - 1) {
+        filtersContainer.innerHTML += '█';
+      }
+      setTimeout(typeFilters, 10);
+    } else {
+      filtersContainer.innerHTML = filtersContainer.innerHTML.replace('█', '');
+      filtersContainer.classList.add('visible');
+    }
+  }
+
+  // Start sequential animation
+  setTimeout(() => {
+    typeHomepage();
+    setTimeout(() => {
+      typeViewSwitch();
+      setTimeout(() => {
+        explanationContainer.style.opacity = '1';
+        filtersContainer.style.opacity = '1';
+        typeExplanation();
+        typeFilters();
+      }, viewSwitchChars.length * 50 + 200);
+    }, homepageChars.length * 50 + 200);
+  }, 500);
+
+  // Setup filter click handlers and update positions
+  setupFilterClickHandlers();
+  aggiornaPosizioniImmagini();
+}
+
+    
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('toggleMode').style.display = 'none';
+      
+      const terminalText = document.querySelector('.terminal-text');
+      const terminal = document.querySelector('.content');
+      
+      let originalText = '';
+      let isTypingComplete = false;
+      let currentInput = '';
+
+      // Prima typewriter animation
+      function typeWriter() {
+  const text = terminalText.innerHTML;
+  terminalText.innerHTML = '';
+  terminalText.style.opacity = '1';
+  document.querySelector('.visualization-buttons').classList.add('visible');
+  
+  let i = 0;
+  const characters = text.split('');
+  const totalChars = characters.length;
+  let vertexProgress = 0;
+  let isSkipping = false;
+
+  // Aggiungi event listener per lo skip
+  const skipAnimation = (e) => {
+  if ((e.key === 'Enter' || e.key === ' ' || e.type === 'click') && !isTypingComplete) {
+    e.preventDefault();
+    isSkipping = true;
+    i = totalChars - 1;
+    terminalText.innerHTML = text;
+  }
+};
+
+document.addEventListener('keydown', skipAnimation);
+document.addEventListener('click', skipAnimation); // Aggiungi il listener per il click
+  
+  // Inizializza subito i preview
+  cubePreviewSketch = new p5((p) => {
+    p.setup = function() {
+  let size = Math.min(p.windowWidth * 0.45, 650);
+  let canvas = p.createCanvas(size, size, p.WEBGL);
+  canvas.parent('cubePreview');
+}
+
+p.windowResized = function() {
+  let size = Math.min(p.windowWidth * 0.45, 650);
+  p.resizeCanvas(size, size);
+}
+    p.draw = function() {
+      p.background(0);
+      p.rotateX(p.frameCount * 0.01);
+      p.rotateY(p.frameCount * 0.01);
+      const size = 250;
+      const h = size/2;
+      p.push();
+      p.stroke(255);
+      p.strokeWeight(0.8);
+      p.noFill();
+      
+      const totalLines = 24;
+      const currentLines = isSkipping ? totalLines : Math.floor(map(i, 0, totalChars, 0, totalLines));
+      
+      // Disegna i vertici principali
+      if (currentLines > 0) { p.line(-h, -h, -h, h, -h, -h); }
+      if (currentLines > 1) { p.line(h, -h, -h, h, h, -h); }
+      if (currentLines > 2) { p.line(h, h, -h, -h, h, -h); }
+      if (currentLines > 3) { p.line(-h, h, -h, -h, -h, -h); }
+      if (currentLines > 4) { p.line(-h, -h, h, h, -h, h); }
+      if (currentLines > 5) { p.line(h, -h, h, h, h, h); }
+      if (currentLines > 6) { p.line(h, h, h, -h, h, h); }
+      if (currentLines > 7) { p.line(-h, h, h, -h, -h, h); }
+      if (currentLines > 8) { p.line(-h, -h, -h, -h, -h, h); }
+      if (currentLines > 9) { p.line(h, -h, -h, h, -h, h); }
+      if (currentLines > 10) { p.line(h, h, -h, h, h, h); }
+      if (currentLines > 11) { p.line(-h, h, -h, -h, h, h); }
+
+      // Griglia interna
+      if (currentLines > 11) {
+        p.stroke(255, 80);
+        p.strokeWeight(0.4);
+        const divisions = 4;
+        const step = size/divisions;
+        const gridStart = 12;
+        const gridLines = currentLines - gridStart;
+        
+        let lineCount = 0;
+        for(let axis = -h + step; axis < h; axis += step) {
+          if(lineCount < gridLines) {
+            p.line(-h, -h, axis, -h, h, axis);
+            p.line(h, -h, axis, h, h, axis);
+            p.line(-h, axis, -h, -h, axis, h);
+            p.line(h, axis, -h, h, axis, h);
+          }
+          lineCount++;
+          
+          if(lineCount < gridLines) {
+            p.line(axis, -h, -h, axis, -h, h);
+            p.line(axis, h, -h, axis, h, h);
+            p.line(-h, -h, axis, h, -h, axis);
+            p.line(-h, h, axis, h, h, axis);
+          }
+          lineCount++;
+          
+          if(lineCount < gridLines) {
+            p.line(-h, axis, -h, h, axis, -h);
+            p.line(-h, axis, h, h, axis, h);
+            p.line(axis, -h, -h, axis, h, -h);
+            p.line(axis, -h, h, axis, h, h);
+          }
+          lineCount++;
+        }
+      }
+      p.pop();
+    }
+  }, 'cubePreview');
+
+  cylinderPreviewSketch = new p5((p) => {
+    p.setup = function() {
+  let size = Math.min(p.windowWidth * 0.45, 650);
+  let canvas = p.createCanvas(size, size, p.WEBGL);
+  canvas.parent('cylinderPreview');
+}
+
+p.windowResized = function() {
+  let size = Math.min(p.windowWidth * 0.45, 650);
+  p.resizeCanvas(size, size);
+}
+    p.draw = function() {
+      p.background(0);
+      p.rotateX(p.frameCount * 0.01);
+      p.rotateY(p.frameCount * 0.01);
+      const radius = 250/2.5;
+      const height = 250;
+      const detail = 24;
+      
+      // Dividiamo l'animazione in due fasi
+      // Prima fase (0-12): basi circolari
+      // Seconda fase (12-24): linee verticali
+      const currentDetail = isSkipping ? detail * 2 : // Cambiato qui
+        Math.floor(map(i, 0, totalChars, 0, detail * 2));
+      
+      p.push();
+      p.stroke(255);
+      p.noFill();
+      
+      // Prima fase: basi circolari
+      if (currentDetail > 0) {
+        p.strokeWeight(1);
+        
+        // Base inferiore
+        p.beginShape();
+        for(let j = 0; j <= Math.min(currentDetail, detail); j++) {
+          const angle = p.TWO_PI * j / detail;
+          const x = p.cos(angle) * radius;
+          const z = p.sin(angle) * radius;
+          p.vertex(x, -height/2, z);
+        }
+        p.endShape();
+        
+        // Base superiore
+        p.beginShape();
+        for(let j = 0; j <= Math.min(currentDetail, detail); j++) {
+          const angle = p.TWO_PI * j / detail;
+          const x = p.cos(angle) * radius;
+          const z = p.sin(angle) * radius;
+          p.vertex(x, height/2, z);
+        }
+        p.endShape();
+      }
+      
+
+      // Seconda fase: linee verticali e orizzontali
+// Seconda fase: linee verticali e orizzontali alternate
+if (currentDetail > detail) {
+  p.strokeWeight(0.2);
+  const verticalLines = currentDetail - detail;
+  
+  // Riduci il numero di divisioni
+  const numVerticalDivisions = 12;
+  const numHorizontalDivisions = 4;
+  
+  // Calcola il numero totale di linee da disegnare
+  const totalGridLines = numVerticalDivisions + numHorizontalDivisions;
+  const currentGridLines = Math.min(verticalLines, totalGridLines);
+  
+  // Prima disegna tutte le linee verticali
+  for(let i = 0; i < currentGridLines; i++) {
+    if (i < numVerticalDivisions) {
+      // Linea verticale
+      const angle = p.TWO_PI * i / numVerticalDivisions;
+      const x = p.cos(angle) * radius;
+      const z = p.sin(angle) * radius;
+      p.line(x, -height/2, z, x, height/2, z);
+    }
+    
+    // Poi aggiungi le linee orizzontali
+    if (i >= numVerticalDivisions && i - numVerticalDivisions < numHorizontalDivisions) {
+      const h = -height/2 + height * (i - numVerticalDivisions + 1) / (numHorizontalDivisions + 1);
+      p.beginShape();
+      for(let j = 0; j <= numVerticalDivisions; j++) {
+        const angle = p.TWO_PI * j / numVerticalDivisions;
+        const x = p.cos(angle) * radius;
+        const z = p.sin(angle) * radius;
+        p.vertex(x, h, z);
+      }
+      p.endShape();
+    }
+  }
+}
+      
+      p.pop();
+    }
+}, 'cylinderPreview');
+
+  function type() {
+  if (i < characters.length) {
+    if (isSkipping) {
+      terminalText.innerHTML = text;
+      i = characters.length;
+      isTypingComplete = true;
+      originalText = terminalText.innerHTML;
+      setupTerminalInput();
+      document.removeEventListener('keydown', skipAnimation);
+    } else {
+      let currentText = '';
+      let inTag = false;
+      let currentTag = '';
+      
+      for (let j = 0; j <= i; j++) {
+        if (characters[j] === '<') {
+          inTag = true;
+          currentTag = '<';
+        } else if (inTag && characters[j] === '>') {
+          inTag = false;
+          currentTag += '>';
+          currentText += currentTag;
+        } else if (inTag) {
+          currentTag += characters[j];
+        } else {
+          currentText += characters[j];
+        }
+      }
+      
+      terminalText.innerHTML = currentText;
+      i++;
+      setTimeout(type, 1);
+    }
+  } else {
+    isTypingComplete = true;
+    originalText = terminalText.innerHTML;
+    setupTerminalInput();
+    document.removeEventListener('keydown', skipAnimation);
+  }
+}
+  
+  type();
+}
+
+      function setupTerminalInput() {
+        const input = document.createElement('input');
+        input.className = 'terminal-input';
+        terminal.appendChild(input);
+        
+        document.addEventListener('keydown', (e) => {
+          if (!isTypingComplete) return;
+
+          if (e.key === 'Enter') {
+            const command = currentInput.trim();
+            originalText += `${currentInput}\n`;
+            currentInput = '';
+            processCommand(command);
+          } else if (e.key === 'Backspace') {
+            currentInput = currentInput.slice(0, -1);
+          } else if (e.key.length === 1) {
+            currentInput += e.key;
+          }
+          
+          updateDisplay();
+        });
+
+        function updateDisplay() {
+          terminalText.innerHTML = originalText + currentInput;
+        }
+
+        function processCommand(command) {
+  if (command === '') {
+    originalText += `utente@${deviceName} ~ % `;
+    updateDisplay();
+    return;
+  }
+
+  switch(command.toLowerCase()) {
+    case 'cubo':
+    case 'cilindro':
+      const mode = command.toLowerCase();
+      originalText += `creazione spazio colore\n`;
+      let currentText = originalText;
+      
+      let progress = 0;
+      const loadingInterval = setInterval(() => {
+        progress += 2;
+        const barLength = 30;
+        const filled = Math.floor((progress * barLength) / 100);
+        const empty = barLength - filled;
+        const progressBar = '<span class="loading-bar">[' + '█'.repeat(filled) + ' '.repeat(empty) + ']</span>';
+        
+        terminalText.innerHTML = currentText + progressBar + ` ${progress}%`;
+        
+        if (progress >= 100) {
+          clearInterval(loadingInterval);
+          originalText = currentText + 
+            `<span class="loading-bar">[████████████████████████████████] 100%</span>\n` +
+            `Transizione completata.\nPassaggio alla visualizzazione ${mode.toUpperCase()}\n`;
+          
+          terminalText.innerHTML = originalText;
+          
+          setTimeout(() => {
+            modalita = mode === 'cubo' ? 'rgb' : 'hsb';
+            animateAndTransition();
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('toggleMode').style.display = 'block';
+            aggiornaPosizioniImmagini();
+          }, 500);
+        }
+      }, 30);
+      break;
+      
+    case 'help':
+      originalText += `Comandi disponibili:\n• cubo - visualizza lo spazio RGB\n• cilindro - visualizza lo spazio HSB\n• help - mostra questo messaggio\nutente@${deviceName} ~ % `;
+      updateDisplay();
+      break;
+      
+    default:
+      originalText += `zsh: comando non trovato: ${command}\nutente@${deviceName} ~ % `;
+      updateDisplay();
+  }
+}
+
+        function showExplanation(mode) {
+          let explanation = '';
+          
+          if (mode === 'cubo') {
+            // Modifica la spiegazione del cubo RGB aggiungendo le opzioni alla fine:
+explanation = `
+<span class="explanation-text">
+# VISUALIZZAZIONE CUBO RGB
+# --------------------------------------------------
+# Questo spazio tridimensionale rappresenta il modello
+# colore RGB in forma cubica. Ogni asse corrisponde a
+# una componente cromatica primaria:
+#
+# • Asse X: Rosso (Red) da 0 a 255
+# • Asse Y: Verde (Green) da 0 a 255
+# • Asse Z: Blu (Blue) da 0 a 255
+#
+# Le immagini sono posizionate in base al loro colore
+# medio calcolato. Ogni punto nel cubo rappresenta una
+# combinazione unica di valori RGB.
+#
+# L'origine (0,0,0) corrisponde al nero, mentre
+# l'angolo opposto (255,255,255) al bianco.
+#
+# I colori saturi si trovano agli angoli del cubo:
+# • Rosso puro: (255, 0, 0)
+# • Verde puro: (0, 255, 0)
+# • Blu puro: (0, 0, 255)
+#
+# Naviga nello spazio con il mouse per esplorare la
+# distribuzione cromatica del tuo archivio fotografico.
+#
+# Torna alla homepage
+# Visualizzazione HSB
+</span>
+`;
+
+// Modifica la spiegazione del cilindro HSB aggiungendo le opzioni alla fine:
+explanation = `
+<span class="explanation-text">
+# VISUALIZZAZIONE CILINDRO HSB
+# --------------------------------------------------
+# Questo spazio rappresenta il modello colore HSB/HSV
+# in forma cilindrica:
+#
+# • Angolo: Tonalità (Hue) da 0° a 360°
+# • Raggio: Saturazione (Saturation) da 0% a 100%
+# • Altezza: Luminosità (Brightness) da 0% a 100%
+#
+# Le immagini sono posizionate in base alla loro
+# tonalità media, saturazione e luminosità.
+#
+# La base del cilindro rappresenta i colori a massima
+# luminosità (100%), mentre la sommità quelli scuri.
+# Il centro dell'asse verticale rappresenta il bianco
+# puro (in cima) e il nero puro (in fondo).
+#
+# I colori saturi si trovano lungo la superficie
+# esterna del cilindro, mentre i colori desaturati
+# (grigi) si avvicinano al centro.
+#
+# Naviga nello spazio con il mouse per esplorare le
+# relazioni percettive tra i colori del tuo archivio.
+#
+# Torna alla homepage
+# Visualizzazione RGB
+</span>
+`;
+          }
+          
+          terminalText.innerHTML = explanation;
+        }
+
+        terminal.addEventListener('click', () => input.focus());
+        input.focus();
+      }
+
+      typeWriter();
+    });
+
+
+
+
+
+
+
+
+
+
+
+    // Aggiungi queste funzioni dopo le funzioni esistenti e prima della chiusura dello script
+
+function filterImagesByClass(className) {
+  // Filtra le immagini basandosi sulla classe selezionata
+  visibleImages = immagini.filter(img => {
+    const imgData = Object.values(atlasData).find(item => item.FileName === img.nome);
+    return imgData && imgData.class === className;
+  });
+  
+  // Aggiorna le posizioni delle immagini filtrate
+  aggiornaPosizioniImmagini();
+}
+
+function resetFilter() {
+  // Ripristina tutte le immagini
+  visibleImages = [...immagini];
+  aggiornaPosizioniImmagini();
+}
+
+// Modifica la funzione setupFilterClickHandlers
+function setupFilterClickHandlers() {
+  const filtersContainer = document.querySelector('.filters-container');
+  
+  // Funzione helper per aggiornare lo stato visivo dei filtri
+  function updateFilterVisuals() {
+    const filters = filtersContainer.querySelectorAll('span');
+    filters.forEach(filter => {
+      const filterName = filter.textContent.split('[')[0].trim();
+      if (filterName === filtroAttivo) {
+        filter.classList.add('active-filter');
+      } else {
+        filter.classList.remove('active-filter');
+      }
+    });
+  }
+
+  filtersContainer.addEventListener('click', (e) => {
+    if (!e.target.matches('span')) return;
+
+    const text = e.target.textContent;
+    const className = text.split('[')[0].trim();
+
+    if (filtroAttivo === className) {
+      // Se stai cliccando sul filtro già attivo, lo disattivi
+      filtroAttivo = null;
+      resetFilter();
+    } else {
+      // Altrimenti, applichi un nuovo filtro
+      filtroAttivo = className;
+      filterImagesByClass(className);
+    }
+
+    updateFilterVisuals();
+    aggiornaPosizioniImmagini();
+  });
+
+  // Aggiorna lo stato visivo dei filtri anche dopo l'animazione
+  const observer = new MutationObserver(() => {
+    updateFilterVisuals();
+  });
+
+  observer.observe(filtersContainer, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+}
+
+  </script>
+  <div id="explanation-container" class="explanation-container"></div>
+<div id="filters-container" class="filters-container"></div>
+<div id="homepage-button" class="homepage-button"></div>
+<div id="view-switch-button" class="view-switch-button"></div>
+
+</body>
+</html>
