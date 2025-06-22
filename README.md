@@ -6,9 +6,9 @@ Elaborato 1: Il mio spettro visivo
 
 # Il mio spettro visivo  
 Autore: Tommaso Stanga  
-[Il mio spettro visivo](https://tommifunky.github.io/il_mio_spettro_visivo/)
-\n
+[Il mio spettro visivo](https://tommifunky.github.io/il_mio_spettro_visivo/)  
 [Il mio spettro visivo - DEBUG [html standalone]](https://tommifunky.github.io/elaborato1_html_esteso/)
+
 
 ## Introduzione e tema  
 *Il mio spettro visivo* è un’interfaccia web interattiva che esplora la mia memoria fotografica personale attraverso lo spettro dei colori. L’archivio è composto da **1001 immagini** scattate con iPhone tra il 2011 e il 2025. Ogni immagine è stata analizzata tramite tecniche di computer vision per estrarre il **colore medio** e i **contenuti visivi rilevati automaticamente**.
