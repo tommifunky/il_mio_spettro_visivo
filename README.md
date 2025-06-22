@@ -7,6 +7,7 @@ Elaborato 1: Il mio spettro visivo
 # Il mio spettro visivo  
 Autore: Tommaso Stanga  
 [Il mio spettro visivo](https://tommifunky.github.io/il_mio_spettro_visivo/)
+\n
 [Il mio spettro visivo - DEBUG [html standalone]](https://tommifunky.github.io/elaborato1_html_esteso/)
 
 ## Introduzione e tema  
