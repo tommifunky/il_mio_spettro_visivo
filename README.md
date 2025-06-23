@@ -72,6 +72,87 @@ Il progetto utilizza:
 - mappare tutte le immagini da un’unica texture in modo ottimizzato
 
 ```javascript
+// Caricamento dati da JSON e texture atlas
+function preload() {
+  atlas = loadImage(ATLAS_PATH);
+  atlasData = loadJSON(ATLAS_JSON);
+  colorData = loadJSON(COLORS_JSON);
+  yoloData = loadJSON('dataset/data_yolo_semplificato.json');
+}
+
+// Creazione oggetti immagine dal dataset
+Object.keys(atlasData).forEach(key => {
+  const item = atlasData[key];
+  const colorHex = colorMap[item.FileName.toLowerCase()];
+  if (!colorHex) return;
+
+  const u1 = item.x / atlas.width;
+  const v1 = item.y / atlas.height;
+  const u2 = (item.x + item.width) / atlas.width;
+  const v2 = (item.y + item.height) / atlas.height;
+
+  immagini.push(new Immagine(
+    item.FileName, item.width / 8, item.height / 8, 
+    u1, v1, u2, v2, 0, 0, 0
+  ));
+});
+
+// Rendering immagini 3D nello spazio WebGL
+function draw() {
+  background(0);
+  orbitControl();
+  ambientLight(255);
+
+  // Rendering immagini come QUAD texture-mappati
+  noStroke();
+  beginShape(QUADS);
+  texture(atlas);
+  visibleImages.forEach(img => img.emettiVertici());
+  endShape();
+}
+
+// Classe oggetto Immagine con gestione vertici e UV
+class Immagine {
+  constructor(nome, w, h, u1, v1, u2, v2, x, y, z) {
+    this.nome = nome;
+    this.w = w;
+    this.h = h;
+    this.u1 = u1;
+    this.v1 = v1;
+    this.u2 = u2;
+    this.v2 = v2;
+    this.pos = createVector(x, y, z);
+  }
+
+  emettiVertici() {
+    const mv = this.getModelViewMatrix();
+    const right = createVector(mv[0][0], mv[1][0], mv[2][0]);
+    const up = createVector(mv[0][1], mv[1][1], mv[2][1]);
+    const w2 = this.w / 2;
+    const h2 = this.h / 2;
+    
+    const v1 = p5.Vector.add(this.pos, p5.Vector.add(p5.Vector.mult(right, -w2), p5.Vector.mult(up, -h2)));
+    const v2 = p5.Vector.add(this.pos, p5.Vector.add(p5.Vector.mult(right,  w2), p5.Vector.mult(up, -h2)));
+    const v3 = p5.Vector.add(this.pos, p5.Vector.add(p5.Vector.mult(right,  w2), p5.Vector.mult(up,  h2)));
+    const v4 = p5.Vector.add(this.pos, p5.Vector.add(p5.Vector.mult(right, -w2), p5.Vector.mult(up,  h2)));
+    
+    vertex(v1.x, v1.y, v1.z, this.u1, this.v1);
+    vertex(v2.x, v2.y, v2.z, this.u2, this.v1);
+    vertex(v3.x, v3.y, v3.z, this.u2, this.v2);
+    vertex(v4.x, v4.y, v4.z, this.u1, this.v2);
+  }
+
+  getModelViewMatrix() {
+    const mv = _renderer.uMVMatrix.mat4;
+    return [
+      [mv[0], mv[1], mv[2], mv[3]],
+      [mv[4], mv[5], mv[6], mv[7]],
+      [mv[8], mv[9], mv[10], mv[11]],
+      [mv[12], mv[13], mv[14], mv[15]]
+    ];
+  }
+}
+
 // Posizionamento immagine nello spazio RGB
 let x = map(r, 0, 255, -cubeSize/2, cubeSize/2);
 let y = map(b, 0, 255, cubeSize/2, -cubeSize/2);
