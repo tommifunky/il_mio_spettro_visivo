@@ -96,10 +96,10 @@ Il sito è pensato per chi è interessato a:
 Può essere usato in contesti accademici, di **data visualization artistica**, mostre, oppure come riflessione personale sul tema memoria + AI.
 
 ## Media di progetto  
-<img src="img/landing_page_.png" width="500" alt="Landing page" />
+<img src="img/landing_page.png" width="800" alt="Pagina di avvio" />
 
-<img src="img/cube_page.png" width="500" alt="Visualizzazione in cubo RGB" />
+<img src="img/cube_page.png" width="800" alt="Pagina cubo RGB" />
 
-<img src="img/cylinder_page.png" width="500" alt="Visualizzazione in cilindro HSB" />
+<img src="img/cylinder_page.png" width="800" alt="Pagina cilindro HSB" />
 
-<img src="img/filter_and_image_box.png" width="500" alt="Filtro attivo: dog" />
+<img src="img/filter_and_image_box.png" width="800" alt="Filtro e immagine attivi" />
