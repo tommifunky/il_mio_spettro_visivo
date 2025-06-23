@@ -96,14 +96,10 @@ Il sito è pensato per chi è interessato a:
 Può essere usato in contesti accademici, di **data visualization artistica**, mostre, oppure come riflessione personale sul tema memoria + AI.
 
 ## Media di progetto  
-<img src="img/landing-terminal.png" width="500" alt="Landing in stile terminale" />
+<img src="img/landing_page_.png" width="500" alt="Landing page" />
 
-<img src="img/cubo-rgb.png" width="500" alt="Visualizzazione in cubo RGB" />
+<img src="img/cube_page.png" width="500" alt="Visualizzazione in cubo RGB" />
 
-<img src="img/cilindro-hsb.png" width="500" alt="Visualizzazione in cilindro HSB" />
+<img src="img/cylinder_page.png" width="500" alt="Visualizzazione in cilindro HSB" />
 
-<img src="img/filtro-dog.png" width="500" alt="Filtro attivo: dog" />
-
-## Interazione live nel canvas  
-<img src="img/3d-exploration.png" width="500" alt="Esplorazione 3D attiva" />
-
+<img src="img/filter_and_image_box.png" width="500" alt="Filtro attivo: dog" />
